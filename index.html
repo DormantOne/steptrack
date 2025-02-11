@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>StepTrack</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+        }
+        .input-group {
+            margin: 10px 0;
+        }
+        .history {
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            min-height: 100px;
+        }
+        button {
+            margin: 5px;
+            padding: 8px 15px;
+            cursor: pointer;
+        }
+        input {
+            padding: 5px;
+            margin: 5px;
+        }
+        .hidden {
+            display: none;
+        }
+        #roomPrompt {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 20px;
+            border: 2px solid #ccc;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+    <h1>StepTrack</h1>
+    
+    <div id="roomPrompt">
+        <h3>Enter Room Number:</h3>
+        <input type="text" id="roomInput">
+        <button onclick="saveEntry()">Save</button>
+    </div>
+
+    <div class="input-group">
+        <button onclick="clearHistory()">Clear All</button>
+        <button onclick="showEmailForm()">Email History</button>
+    </div>
+
+    <div id="emailForm" class="hidden">
+        <input type="email" id="emailInput" placeholder="Enter email address">
+        <button onclick="sendEmail()">Send</button>
+    </div>
+
+    <div class="history" id="historyContainer">
+        <!-- Entries will be added here -->
+    </div>
+
+    <script>
+        // Load saved data and process URL when page loads
+        window.onload = function() {
+            loadHistory();
+            processUrlSteps();
+        }
+
+        function processUrlSteps() {
+            const url = window.location.href;
+            const pattern = /\%(\d+):(\d+)/g;
+            const matches = [...url.matchAll(pattern)];
+            
+            if (matches && matches.length > 0) {
+                // Store the current steps temporarily
+                window.currentSteps = matches.map(match => match[2]);
+                // Room prompt is already visible by default
+            } else {
+                document.getElementById('roomPrompt').style.display = 'none';
+            }
+        }
+
+        function saveEntry() {
+            const roomInput = document.getElementById('roomInput').value;
+            
+            if (!roomInput) {
+                alert('Please enter a room number');
+                return;
+            }
+
+            if (!window.currentSteps) {
+                alert('No step data found in URL');
+                return;
+            }
+
+            // Create entry
+            const entry = {
+                steps: window.currentSteps,
+                room: roomInput,
+                timestamp: new Date().toLocaleString()
+            };
+
+            // Save to local storage
+            let history = JSON.parse(localStorage.getItem('steptrack-history') || '[]');
+            history.push(entry);
+            localStorage.setItem('steptrack-history', JSON.stringify(history));
+
+            // Update display
+            displayHistory();
+            
+            // Hide room prompt
+            document.getElementById('roomPrompt').style.display = 'none';
+            // Clear the current steps
+            window.currentSteps = null;
+        }
+
+        function displayHistory() {
+            const container = document.getElementById('historyContainer');
+            const history = JSON.parse(localStorage.getItem('steptrack-history') || '[]');
+            
+            container.innerHTML = history.map(entry => `
+                <div style="border-bottom: 1px solid #eee; padding: 10px;">
+                    <strong>Room ${entry.room}</strong> - ${entry.timestamp}<br>
+                    Steps: ${entry.steps.join(', ')}
+                </div>
+            `).join('');
+        }
+
+        function loadHistory() {
+            displayHistory();
+        }
+
+        function clearHistory() {
+            if (confirm('Are you sure you want to clear all history?')) {
+                localStorage.removeItem('steptrack-history');
+                displayHistory();
+            }
+        }
+
+        function showEmailForm() {
+            const emailForm = document.getElementById('emailForm');
+            emailForm.classList.toggle('hidden');
+        }
+
+        function sendEmail() {
+            const email = document.getElementById('emailInput').value;
+            if (!email) {
+                alert('Please enter an email address');
+                return;
+            }
+
+            const history = localStorage.getItem('steptrack-history') || '[]';
+            const mailtoLink = `mailto:${email}?subject=StepTrack History&body=${encodeURIComponent(history)}`;
+            
+            window.location.href = mailtoLink;
+            
+            // Hide email form after sending
+            document.getElementById('emailForm').classList.add('hidden');
+            document.getElementById('emailInput').value = '';
+        }
+    </script>
+</body>
+</html>
