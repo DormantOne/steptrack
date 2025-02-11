@@ -83,6 +83,7 @@
             width: 90%;
             max-width: 320px;
             z-index: 1000;
+            display: none;
         }
 
         #roomPrompt h3 {
@@ -161,8 +162,11 @@
 
     <script>
         window.onload = function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.has('data')) {
+                processUrlSteps();
+            }
             loadHistory();
-            processUrlSteps();
         }
 
         function processUrlSteps() {
