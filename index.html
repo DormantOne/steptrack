@@ -2,34 +2,74 @@
 <html>
 <head>
     <title>StepTrack</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
         body {
             font-family: Arial, sans-serif;
             max-width: 800px;
-            margin: 20px auto;
-            padding: 20px;
+            margin: 0 auto;
+            padding: 15px;
+            line-height: 1.4;
         }
+
+        h1 {
+            font-size: 24px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
         .input-group {
             margin: 10px 0;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
         }
+
         .history {
             margin-top: 20px;
             padding: 10px;
             border: 1px solid #ccc;
+            border-radius: 8px;
             min-height: 100px;
         }
+
         button {
             margin: 5px;
-            padding: 8px 15px;
+            padding: 12px 20px;
             cursor: pointer;
+            border: none;
+            background: #007bff;
+            color: white;
+            border-radius: 5px;
+            font-size: 16px;
+            touch-action: manipulation;
         }
+
+        button:hover {
+            background: #0056b3;
+        }
+
         input {
-            padding: 5px;
+            padding: 12px;
             margin: 5px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+            width: 100%;
+            max-width: 300px;
         }
+
         .hidden {
             display: none;
         }
+
         #roomPrompt {
             position: fixed;
             top: 50%;
@@ -38,7 +78,61 @@
             background: white;
             padding: 20px;
             border: 2px solid #ccc;
+            border-radius: 8px;
             box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            width: 90%;
+            max-width: 320px;
+            z-index: 1000;
+        }
+
+        #roomPrompt h3 {
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .history-entry {
+            border-bottom: 1px solid #eee;
+            padding: 15px 10px;
+        }
+
+        .history-entry strong {
+            font-size: 16px;
+        }
+
+        .steps-display {
+            margin-top: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .step-item {
+            background: #f8f9fa;
+            padding: 8px;
+            border-radius: 4px;
+        }
+
+        @media (max-width: 600px) {
+            body {
+                padding: 10px;
+            }
+
+            h1 {
+                font-size: 20px;
+            }
+
+            button {
+                width: 100%;
+                margin: 5px 0;
+            }
+
+            input {
+                width: 100%;
+            }
+
+            .steps-display {
+                font-size: 14px;
+            }
         }
     </style>
 </head>
@@ -128,12 +222,12 @@
             const history = JSON.parse(localStorage.getItem('steptrack-history') || '[]');
             
             container.innerHTML = history.map(entry => `
-                <div style="border-bottom: 1px solid #eee; padding: 10px;">
-                    <strong>Room ${entry.room}</strong> - ${entry.timestamp}<br>
-                    <div style="margin-top: 5px;">
-                        <span style="margin-right: 15px;">Last 8 hours: ${entry.steps[0]}</span>
-                        <span style="margin-right: 15px;">Last 24 hours: ${entry.steps[1]}</span>
-                        <span>Last 72 hours: ${entry.steps[2]}</span>
+                <div class="history-entry">
+                    <strong>Room ${entry.room}</strong> - ${entry.timestamp}
+                    <div class="steps-display">
+                        <span class="step-item">Last 8 hours: ${entry.steps[0]}</span>
+                        <span class="step-item">Last 24 hours: ${entry.steps[1]}</span>
+                        <span class="step-item">Last 72 hours: ${entry.steps[2]}</span>
                     </div>
                 </div>
             `).join('');
