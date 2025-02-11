@@ -45,7 +45,7 @@
 <body>
     <h1>StepTrack</h1>
     
-    <div id="roomPrompt">
+    <div id="roomPrompt" class="hidden">
         <h3>Enter Room Number:</h3>
         <input type="text" id="roomInput">
         <button onclick="saveEntry()">Save</button>
@@ -73,16 +73,26 @@
         }
 
         function processUrlSteps() {
-            const url = window.location.href;
-            const pattern = /\%(\d+):(\d+)/g;
-            const matches = [...url.matchAll(pattern)];
+            const urlParams = new URLSearchParams(window.location.search);
+            const stepsParam = urlParams.get('steps');
             
-            if (matches && matches.length > 0) {
-                // Store the current steps temporarily
-                window.currentSteps = matches.map(match => match[2]);
-                // Room prompt is already visible by default
+            if (stepsParam) {
+                // Show the current URL being processed
+                console.log('Processing URL:', window.location.href);
+                console.log('Steps parameter:', stepsParam);
+
+                const pattern = /\%(\d+):(\d+)/g;
+                const matches = [...stepsParam.matchAll(pattern)];
+                
+                if (matches && matches.length > 0) {
+                    window.currentSteps = matches.map(match => match[2]);
+                    document.getElementById('roomPrompt').classList.remove('hidden');
+                    console.log('Found steps:', window.currentSteps);
+                } else {
+                    console.log('No valid step pattern found in:', stepsParam);
+                }
             } else {
-                document.getElementById('roomPrompt').style.display = 'none';
+                console.log('No steps parameter found in URL');
             }
         }
 
@@ -115,9 +125,11 @@
             displayHistory();
             
             // Hide room prompt
-            document.getElementById('roomPrompt').style.display = 'none';
+            document.getElementById('roomPrompt').classList.add('hidden');
             // Clear the current steps
             window.currentSteps = null;
+            // Clear room input
+            document.getElementById('roomInput').value = '';
         }
 
         function displayHistory() {
